@@ -1,1 +1,1 @@
-# Rust Project Template with functional CI/CD, devcontainer, dockerfile
+# JamieLiu_Indiv_Proj2

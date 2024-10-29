@@ -1,5 +1,6 @@
 use sqlite::{
-    create_record, delete_record, extract, general_query, load, read_data, update_record,
+    create_record, delete_record, extract, general_query, load, read_data, read_record,
+    update_record,
 };
 
 use clap::{Parser, Subcommand};
@@ -39,6 +40,9 @@ enum Actions {
         query: String,
     },
     ReadData,
+    ReadRecord {
+        country: String,
+    },
 }
 
 fn main() {
@@ -124,6 +128,18 @@ fn main() {
             }
             Err(e) => {
                 eprintln!("Error in read_data: {}", e);
+                process::exit(1);
+            }
+        },
+        Actions::ReadRecord { country } => match read_record(country) {
+            Ok(Some(record)) => {
+                println!("Record found: {:?}", record);
+            }
+            Ok(None) => {
+                println!("No record found for country '{}'", country);
+            }
+            Err(e) => {
+                eprintln!("Error in read_record: {}", e);
                 process::exit(1);
             }
         },

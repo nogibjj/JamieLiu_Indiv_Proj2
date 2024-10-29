@@ -30,13 +30,17 @@ extract:
 load:
 	cargo run -- load
 
+# Example: Read from the database
+read-data:
+	cargo run -- read-data
+
 # Example: Create a database entry
 create:
 	cargo run -- create-record Testland 300 200 150 12.5
 
-# Example: Read from the database
+# Example: Read a specific database entry
 read:
-	cargo run -- read-data
+	cargo run -- read-record Testland
 
 # Example: Update a database entry
 update:
@@ -45,7 +49,7 @@ update:
 # Example: Delete a database entry
 delete:
 	cargo run -- delete-record Testland
-
-# Example: Custom query
+	
+# Example: Custom query to check for Germany in the DrinksDB table
 query:
-	cargo run -- general-query "SELECT * FROM DrinksDB WHERE country = 'Testland';"
+	cargo run -- general-query "SELECT * FROM DrinksDB WHERE country = 'Germany';"

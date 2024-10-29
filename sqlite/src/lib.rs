@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::{self, BufReader, Write};
 
 type DrinkData = Vec<(String, i32, i32, i32, f64)>;
+type DrinkRecord = (String, i32, i32, i32, f64);
 
 pub fn extract(url: &str, file_path: &str) -> io::Result<()> {
     // Fetch the data from the provided URL
@@ -126,4 +127,26 @@ pub fn general_query(query: &str) -> Result<DrinkData> {
         conn.execute(query, [])?;
     }
     Ok(results)
+}
+
+pub fn read_record(country: &str) -> Result<Option<DrinkRecord>> {
+    let conn = Connection::open("DrinksDB.db")?;
+    let mut stmt = conn.prepare("SELECT * FROM DrinksDB WHERE country = ?1")?;
+
+    let mut rows = stmt.query_map(params![country], |row| {
+        Ok((
+            row.get(0)?, // country as String
+            row.get(1)?, // beer_servings as i32
+            row.get(2)?, // spirit_servings as i32
+            row.get(3)?, // wine_servings as i32
+            row.get(4)?, // total_litres_of_pure_alcohol as f64
+        ))
+    })?;
+
+    // Fetch the first row, if it exists
+    if let Some(row) = rows.next() {
+        row.map(Some) // Return the row as `Some`
+    } else {
+        Ok(None) // If no row is found, return `None`
+    }
 }

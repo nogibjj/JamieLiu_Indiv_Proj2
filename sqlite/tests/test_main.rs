@@ -9,6 +9,7 @@ fn setup_test_db() {
     if Path::new(TEST_DB).exists() {
         fs::remove_file(TEST_DB).expect("Failed to delete test database");
     }
+    println!("Test database setup completed.");
 }
 
 fn teardown_test_db() {
@@ -16,6 +17,7 @@ fn teardown_test_db() {
     if Path::new(TEST_DB).exists() {
         fs::remove_file(TEST_DB).expect("Failed to delete test database");
     }
+    println!("Test database teardown completed.");
 }
 
 #[test]
@@ -143,51 +145,6 @@ fn test_delete_record() {
 }
 
 #[test]
-fn test_general_query() {
-    setup_test_db();
-
-    // Step 1: Create the record
-    let create_result = Command::new("cargo")
-        .args(&[
-            "run",
-            "--",
-            "create-record",
-            "Testland",
-            "300",
-            "200",
-            "150",
-            "12.5",
-        ])
-        .env("DATABASE_URL", TEST_DB)
-        .output()
-        .expect("Failed to insert test record for general_query");
-
-    println!("Output from create-record: {:?}", create_result);
-    assert!(create_result.status.success());
-
-    // Step 2: Check if the record was created successfully
-    let check_result = Command::new("cargo")
-        .args(&[
-            "run",
-            "--",
-            "general-query",
-            "SELECT country FROM DrinksDB WHERE country = 'Testland'",
-        ])
-        .env("DATABASE_URL", TEST_DB)
-        .output()
-        .expect("Failed to execute general_query command");
-
-    println!("Output from general-query: {:?}", check_result);
-    let stdout = String::from_utf8_lossy(&check_result.stdout);
-    println!("Standard output: {}", stdout); // Print stdout for further inspection
-
-    assert!(check_result.status.success());
-    assert!(stdout.contains("Testland"), "Record not found in database");
-
-    teardown_test_db();
-}
-
-#[test]
 fn test_read_data() {
     setup_test_db();
     let _ = Command::new("cargo")
@@ -217,5 +174,80 @@ fn test_read_data() {
 
     assert!(result.status.success());
     assert!(stdout.contains("Testland"));
+    teardown_test_db();
+}
+
+#[test]
+fn test_read_record() {
+    setup_test_db();
+    // Insert a test record for "Testland"
+    let _ = Command::new("cargo")
+        .args(&[
+            "run",
+            "--",
+            "create-record",
+            "Testland",
+            "300",
+            "200",
+            "150",
+            "12.5",
+        ])
+        .env("DATABASE_URL", TEST_DB)
+        .output()
+        .expect("Failed to insert test record for read_record");
+
+    // Read the specific record for "Testland"
+    let result = Command::new("cargo")
+        .args(&["run", "--", "read-record", "Testland"])
+        .env("DATABASE_URL", TEST_DB)
+        .output()
+        .expect("Failed to execute read_record command");
+
+    println!("Output from read-record: {:?}", result);
+    let stdout = String::from_utf8_lossy(&result.stdout);
+    println!("Standard output: {}", stdout);
+
+    // Verify that the output contains "Testland"
+    assert!(result.status.success());
+    assert!(stdout.contains("Testland"));
+    teardown_test_db();
+}
+
+#[test]
+fn test_general_query() {
+    setup_test_db();
+
+    // Step 1: Load the data to populate the DrinksDB table
+    let load_result = Command::new("cargo")
+        .args(&["run", "--", "load"])
+        .env("DATABASE_URL", TEST_DB)
+        .output()
+        .expect("Failed to execute load command");
+
+    println!("Output from load: {:?}", load_result);
+    assert!(load_result.status.success());
+
+    // Step 2: Run a query to select only the Germany record
+    let query_result = Command::new("cargo")
+        .args(&[
+            "run",
+            "--",
+            "general-query",
+            "SELECT * FROM DrinksDB WHERE country = 'Germany';",
+        ])
+        .env("DATABASE_URL", TEST_DB)
+        .output()
+        .expect("Failed to execute general_query command");
+
+    let stdout = String::from_utf8_lossy(&query_result.stdout);
+    println!("Output from general-query: {}", stdout);
+
+    // Verify that the output contains "Germany"
+    assert!(query_result.status.success(), "Query did not succeed");
+    assert!(
+        stdout.contains("Germany"),
+        "Expected record for Germany not found in output"
+    );
+
     teardown_test_db();
 }

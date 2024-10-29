@@ -1,5 +1,5 @@
 use sqlite::{
-    create_record, delete_record, extract, general_query, load, log_query, read_data, update_record,
+    create_record, delete_record, extract, general_query, load, read_data, update_record,
 };
 
 use clap::{Parser, Subcommand};
@@ -102,9 +102,6 @@ fn main() {
             }
         }
         Actions::GeneralQuery { query } => {
-            if let Err(e) = log_query(query) {
-                eprintln!("Error logging query: {}", e);
-            }
             match general_query(query) {
                 Ok(data) => {
                     println!("Query results:");

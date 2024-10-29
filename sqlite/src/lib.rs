@@ -6,7 +6,6 @@ use std::io::{self, BufReader, Write};
 
 type DrinkData = Vec<(String, i32, i32, i32, f64)>;
 
-
 pub fn extract(url: &str, file_path: &str) -> io::Result<()> {
     // Fetch the data from the provided URL
     let response = get(url).expect("Failed to fetch data from URL");
@@ -127,14 +126,4 @@ pub fn general_query(query: &str) -> Result<DrinkData> {
         conn.execute(query, [])?;
     }
     Ok(results)
-}
-
-// Logging functionality (writes the query to a markdown log file)
-pub fn log_query(query: &str) -> io::Result<()> {
-    let mut file = File::options()
-        .append(true)
-        .create(true)
-        .open("drinks_query_log.md")?;
-    writeln!(file, "```sql\n{}\n```\n", query)?;
-    Ok(())
 }

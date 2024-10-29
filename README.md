@@ -4,6 +4,8 @@
 
 ## Video
 
+https://youtu.be/Q3Tg1K7iNWI
+
 ## Drinks ETL-Query CLI Tool
 
 This project is a Rust-based command-line interface (CLI) tool that performs ETL (Extract, Transform, Load) operations on a SQLite database of global alcohol consumption data. It allows you to extract data from a CSV file hosted online, load it into a SQLite database, and perform CRUD (Create, Read, Update, Delete) operations as well as custom SQL queries on the dataset.
@@ -12,26 +14,29 @@ This project is a Rust-based command-line interface (CLI) tool that performs ETL
 
 The project structure is organized as follows:
 
-```plaintext
+````
 JAMIELIU_INDIV_PROJ2
 ├── .devcontainer
-│   ├── devcontainer.json
-│   └── Dockerfile
-├── .github/workflows
+│ ├── devcontainer.json
+│ └── Dockerfile
+├── .github
+│ └── workflows
 │   └── CI.yml
+├── images
 ├── sqlite
-│   ├── data
-│   │   └── drinks.csv
-│   ├── src
-│   │   ├── lib.rs
-│   │   └── main.rs
-│   └── tests
-│       └── test_main.rs
-├── Cargo.toml
-├── DrinksDB.db
-├── Makefile
+│ ├── data
+│ ├── src
+│ │ ├── lib.rs
+│ │ └── main.rs
+│ ├── target
+│ ├── tests
+│ │ └── test_main.rs
+│ ├── Cargo.lock
+│ ├── Cargo.toml
+│ ├── DrinksDB.db
+│ └── Makefile
+├── .gitignore
 └── README.md
-```
 
 ## Project Functions
 
@@ -64,7 +69,7 @@ This project uses the following Rust dependencies:
 
    ```bash
    git clone git@github.com:nogibjj/JamieLiu_Indiv_Proj2.git
-   ```
+````
 
 2. **Build the Project**:
 

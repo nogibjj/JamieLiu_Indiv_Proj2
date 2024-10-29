@@ -168,11 +168,13 @@ fn test_read_data() {
 
     // Check that the output contains known row identifiers (e.g., "Germany") to confirm table contents
     assert!(result.status.success());
-    assert!(stdout.contains("Germany") && stdout.contains("USA"), "Expected rows not found in output");
+    assert!(
+        stdout.contains("Germany") && stdout.contains("USA"),
+        "Expected rows not found in output"
+    );
 
     teardown_test_db();
 }
-
 
 #[test]
 fn test_read_record() {

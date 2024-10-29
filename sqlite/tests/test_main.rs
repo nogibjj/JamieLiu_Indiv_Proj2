@@ -143,39 +143,36 @@ fn test_delete_record() {
     assert!(result.status.success());
     teardown_test_db();
 }
-
 #[test]
 fn test_read_data() {
     setup_test_db();
-    let _ = Command::new("cargo")
-        .args(&[
-            "run",
-            "--",
-            "create-record",
-            "Testland",
-            "300",
-            "200",
-            "150",
-            "12.5",
-        ])
+
+    // Load the dataset into the database
+    let load_result = Command::new("cargo")
+        .args(&["run", "--", "load"])
         .env("DATABASE_URL", TEST_DB)
         .output()
-        .expect("Failed to insert test record for read_data");
+        .expect("Failed to execute load command");
+    assert!(load_result.status.success(), "Failed to load dataset");
 
+    // Run the read-data command to print out the table
     let result = Command::new("cargo")
         .args(&["run", "--", "read-data"])
         .env("DATABASE_URL", TEST_DB)
         .output()
         .expect("Failed to execute read_data command");
 
-    println!("Output from read-data: {:?}", result);
+    // Print diagnostic information
     let stdout = String::from_utf8_lossy(&result.stdout);
-    println!("Standard output: {}", stdout);
+    println!("Output from read-data:\n{}", stdout);
 
+    // Check that the output contains known row identifiers (e.g., "Germany") to confirm table contents
     assert!(result.status.success());
-    assert!(stdout.contains("Testland"));
+    assert!(stdout.contains("Germany") && stdout.contains("USA"), "Expected rows not found in output");
+
     teardown_test_db();
 }
+
 
 #[test]
 fn test_read_record() {

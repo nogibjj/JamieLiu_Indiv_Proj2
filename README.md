@@ -37,7 +37,7 @@ JAMIELIU_INDIV_PROJ2
 │ └── Makefile
 ├── .gitignore
 └── README.md
-
+```
 ## Project Functions
 
 This CLI tool provides several functionalities related to ETL and database management:

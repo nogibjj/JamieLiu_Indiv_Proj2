@@ -14,7 +14,7 @@ This project is a Rust-based command-line interface (CLI) tool that performs ETL
 
 The project structure is organized as follows:
 
-````
+```
 JAMIELIU_INDIV_PROJ2
 ├── .devcontainer
 │ ├── devcontainer.json

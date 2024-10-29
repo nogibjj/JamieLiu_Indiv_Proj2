@@ -69,7 +69,7 @@ This project uses the following Rust dependencies:
 
    ```bash
    git clone git@github.com:nogibjj/JamieLiu_Indiv_Proj2.git
-````
+   ```
 
 2. **Build the Project**:
 

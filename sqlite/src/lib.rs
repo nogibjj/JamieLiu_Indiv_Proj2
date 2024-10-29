@@ -1,8 +1,11 @@
-use rusqlite::{params, Connection, Result};
+use csv::ReaderBuilder;
 use reqwest::blocking::get;
+use rusqlite::{params, Connection, Result};
 use std::fs::File;
 use std::io::{self, BufReader, Write};
-use csv::ReaderBuilder;
+
+type DrinkData = Vec<(String, i32, i32, i32, f64)>;
+
 
 pub fn extract(url: &str, file_path: &str) -> io::Result<()> {
     // Fetch the data from the provided URL
@@ -27,7 +30,9 @@ pub fn load(file_path: &str) -> Result<()> {
     )?;
 
     let file = File::open(file_path).expect("Failed to open CSV file");
-    let mut rdr = ReaderBuilder::new().has_headers(true).from_reader(BufReader::new(file));
+    let mut rdr = ReaderBuilder::new()
+        .has_headers(true)
+        .from_reader(BufReader::new(file));
 
     let mut stmt = conn.prepare(
         "INSERT INTO DrinksDB (country, beer_servings, spirit_servings, wine_servings, total_litres_of_pure_alcohol) VALUES (?, ?, ?, ?, ?)"
@@ -36,7 +41,7 @@ pub fn load(file_path: &str) -> Result<()> {
     for result in rdr.records() {
         let record = result.expect("Failed to read record");
         stmt.execute(params![
-            record[0].as_str(),
+            &record[0], // Add & to pass a double reference
             record[1].parse::<i32>().unwrap_or(0),
             record[2].parse::<i32>().unwrap_or(0),
             record[3].parse::<i32>().unwrap_or(0),
@@ -47,7 +52,11 @@ pub fn load(file_path: &str) -> Result<()> {
 }
 
 pub fn create_record(
-    country: &str, beer_servings: i32, spirit_servings: i32, wine_servings: i32, total_alcohol: f64
+    country: &str,
+    beer_servings: i32,
+    spirit_servings: i32,
+    wine_servings: i32,
+    total_alcohol: f64,
 ) -> Result<()> {
     let conn = Connection::open("DrinksDB.db")?;
     conn.execute(
@@ -58,7 +67,11 @@ pub fn create_record(
 }
 
 pub fn update_record(
-    country: &str, beer_servings: i32, spirit_servings: i32, wine_servings: i32, total_alcohol: f64
+    country: &str,
+    beer_servings: i32,
+    spirit_servings: i32,
+    wine_servings: i32,
+    total_alcohol: f64,
 ) -> Result<()> {
     let conn = Connection::open("DrinksDB.db")?;
     conn.execute(
@@ -74,7 +87,7 @@ pub fn delete_record(country: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn read_data() -> Result<Vec<(String, i32, i32, i32, f64)>> {
+pub fn read_data() -> Result<DrinkData> {
     let conn = Connection::open("DrinksDB.db")?;
     let mut stmt = conn.prepare("SELECT * FROM DrinksDB")?;
     let records = stmt
@@ -91,9 +104,37 @@ pub fn read_data() -> Result<Vec<(String, i32, i32, i32, f64)>> {
     Ok(records)
 }
 
+pub fn general_query(query: &str) -> Result<DrinkData> {
+    let conn = Connection::open("DrinksDB.db")?;
+    let mut results = Vec::new();
+
+    if query.trim().to_lowercase().starts_with("select") {
+        let mut stmt = conn.prepare(query)?;
+        let rows = stmt.query_map([], |row| {
+            Ok((
+                row.get(0)?, // country as String
+                row.get(1)?, // beer_servings as i32
+                row.get(2)?, // spirit_servings as i32
+                row.get(3)?, // wine_servings as i32
+                row.get(4)?, // total_litres_of_pure_alcohol as f64
+            ))
+        })?;
+
+        for row in rows {
+            results.push(row?);
+        }
+    } else {
+        conn.execute(query, [])?;
+    }
+    Ok(results)
+}
+
 // Logging functionality (writes the query to a markdown log file)
 pub fn log_query(query: &str) -> io::Result<()> {
-    let mut file = File::options().append(true).create(true).open("drinks_query_log.md")?;
+    let mut file = File::options()
+        .append(true)
+        .create(true)
+        .open("drinks_query_log.md")?;
     writeln!(file, "```sql\n{}\n```\n", query)?;
     Ok(())
 }

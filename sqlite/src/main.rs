@@ -1,4 +1,6 @@
-mod lib;
+use sqlite::{
+    create_record, delete_record, extract, general_query, load, log_query, read_data, update_record,
+};
 
 use clap::{Parser, Subcommand};
 use std::process;
@@ -15,7 +17,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Actions {
     Extract,
-    TransformLoad,
+    Load,
     UpdateRecord {
         country: String,
         beer_servings: i32,
@@ -45,14 +47,14 @@ fn main() {
     match &cli.action {
         Actions::Extract => {
             println!("Extracting data...");
-            if let Err(e) = lib::extract("https://raw.githubusercontent.com/fivethirtyeight/data/refs/heads/master/alcohol-consumption/drinks.csv", "data/drinks.csv") {
+            if let Err(e) = extract("https://raw.githubusercontent.com/fivethirtyeight/data/refs/heads/master/alcohol-consumption/drinks.csv", "data/drinks.csv") {
                 eprintln!("Error in extract: {}", e);
                 process::exit(1);
             }
         }
-        Actions::TransformLoad => {
+        Actions::Load => {
             println!("Transforming and loading data...");
-            if let Err(e) = lib::load("data/drinks.csv") {
+            if let Err(e) = load("data/drinks.csv") {
                 eprintln!("Error in load: {}", e);
                 process::exit(1);
             }
@@ -64,13 +66,19 @@ fn main() {
             wine_servings,
             total_alcohol,
         } => {
-            if let Err(e) = lib::update_record(country, *beer_servings, *spirit_servings, *wine_servings, *total_alcohol) {
+            if let Err(e) = update_record(
+                country,
+                *beer_servings,
+                *spirit_servings,
+                *wine_servings,
+                *total_alcohol,
+            ) {
                 eprintln!("Error in update_record: {}", e);
                 process::exit(1);
             }
         }
         Actions::DeleteRecord { country } => {
-            if let Err(e) = lib::delete_record(country) {
+            if let Err(e) = delete_record(country) {
                 eprintln!("Error in delete_record: {}", e);
                 process::exit(1);
             }
@@ -82,36 +90,45 @@ fn main() {
             wine_servings,
             total_alcohol,
         } => {
-            if let Err(e) = lib::create_record(country, *beer_servings, *spirit_servings, *wine_servings, *total_alcohol) {
+            if let Err(e) = create_record(
+                country,
+                *beer_servings,
+                *spirit_servings,
+                *wine_servings,
+                *total_alcohol,
+            ) {
                 eprintln!("Error in create_record: {}", e);
                 process::exit(1);
             }
         }
         Actions::GeneralQuery { query } => {
-            if let Err(e) = lib::log_query(query) {
+            if let Err(e) = log_query(query) {
                 eprintln!("Error logging query: {}", e);
             }
-            match lib::general_query(query) {
-                Ok(data) => println!("Query results: {:?}", data),
+            match general_query(query) {
+                Ok(data) => {
+                    println!("Query results:");
+                    for row in data {
+                        println!("{:?}", row); // Use {:?} to print the tuple as Debug
+                    }
+                }
                 Err(e) => {
                     eprintln!("Error in general_query: {}", e);
                     process::exit(1);
                 }
             }
         }
-        Actions::ReadData => {
-            match lib::read_data() {
-                Ok(data) => {
-                    println!("Data:");
-                    for row in data {
-                        println!("{:?}", row);
-                    }
-                }
-                Err(e) => {
-                    eprintln!("Error in read_data: {}", e);
-                    process::exit(1);
+        Actions::ReadData => match read_data() {
+            Ok(data) => {
+                println!("Data:");
+                for row in data {
+                    println!("{:?}", row);
                 }
             }
-        }
+            Err(e) => {
+                eprintln!("Error in read_data: {}", e);
+                process::exit(1);
+            }
+        },
     }
 }

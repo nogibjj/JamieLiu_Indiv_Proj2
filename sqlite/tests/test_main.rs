@@ -13,11 +13,11 @@ fn test_extract() {
 }
 
 #[test]
-fn test_transform_load() {
+fn test_load() {
     let result = Command::new("cargo")
-        .args(&["run", "--", "transform_load"])
+        .args(&["run", "--", "load"])
         .output()
-        .expect("Failed to execute transform_load command");
+        .expect("Failed to execute load command");
 
     assert!(result.status.success());
     let stdout = String::from_utf8_lossy(&result.stdout);
@@ -28,7 +28,14 @@ fn test_transform_load() {
 fn test_create_record() {
     let result = Command::new("cargo")
         .args(&[
-            "run", "--", "create_record", "Testland", "300", "200", "150", "12.5",
+            "run",
+            "--",
+            "create-record",
+            "Testland",
+            "300",
+            "200",
+            "150",
+            "12.5",
         ])
         .output()
         .expect("Failed to execute create_record command");
@@ -41,14 +48,28 @@ fn test_update_record() {
     // Ensure "Testland" exists by creating it before updating
     let _ = Command::new("cargo")
         .args(&[
-            "run", "--", "create_record", "Testland", "300", "200", "150", "12.5",
+            "run",
+            "--",
+            "create-record",
+            "Testland",
+            "300",
+            "200",
+            "150",
+            "12.5",
         ])
         .output()
         .expect("Failed to insert test record for update_record");
 
     let result = Command::new("cargo")
         .args(&[
-            "run", "--", "update_record", "Testland", "320", "210", "160", "13.0",
+            "run",
+            "--",
+            "update-record",
+            "Testland",
+            "320",
+            "210",
+            "160",
+            "13.0",
         ])
         .output()
         .expect("Failed to execute update_record command");
@@ -61,13 +82,20 @@ fn test_delete_record() {
     // Ensure "Testland" exists by creating it before deletion
     let _ = Command::new("cargo")
         .args(&[
-            "run", "--", "create_record", "Testland", "300", "200", "150", "12.5",
+            "run",
+            "--",
+            "create-record",
+            "Testland",
+            "300",
+            "200",
+            "150",
+            "12.5",
         ])
         .output()
         .expect("Failed to insert test record for delete_record");
 
     let result = Command::new("cargo")
-        .args(&["run", "--", "delete_record", "Testland"])
+        .args(&["run", "--", "delete-record", "Testland"])
         .output()
         .expect("Failed to execute delete_record command");
 
@@ -79,7 +107,14 @@ fn test_general_query() {
     // Ensure "Testland" exists by creating it before querying
     let _ = Command::new("cargo")
         .args(&[
-            "run", "--", "create_record", "Testland", "300", "200", "150", "12.5",
+            "run",
+            "--",
+            "create-record",
+            "Testland",
+            "300",
+            "200",
+            "150",
+            "12.5",
         ])
         .output()
         .expect("Failed to insert test record for general_query");
@@ -88,7 +123,7 @@ fn test_general_query() {
         .args(&[
             "run",
             "--",
-            "general_query",
+            "general-query",
             "SELECT * FROM DrinksDB WHERE country = 'Testland'",
         ])
         .output()
@@ -104,13 +139,20 @@ fn test_read_data() {
     // Ensure "Testland" exists by creating it before reading
     let _ = Command::new("cargo")
         .args(&[
-            "run", "--", "create_record", "Testland", "300", "200", "150", "12.5",
+            "run",
+            "--",
+            "create-record",
+            "Testland",
+            "300",
+            "200",
+            "150",
+            "12.5",
         ])
         .output()
         .expect("Failed to insert test record for read_data");
 
     let result = Command::new("cargo")
-        .args(&["run", "--", "read_data"])
+        .args(&["run", "--", "read-data"])
         .output()
         .expect("Failed to execute read_data command");
 
